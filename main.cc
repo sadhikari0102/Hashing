@@ -19,7 +19,7 @@ int PIPESIZE = 50;
 using namespace std ;
 
 
-const int index = 0;
+const int ind = 0;
 const int start = 0;
 
 int64_t hashInt = 0;
@@ -41,14 +41,50 @@ string get_file_contents(const char *filename)
   throw(errno);
 }
 
-void reader(string str, int size) {
-	//read 8 chars at a time from string
+void reader(const char *filename, int windowSize) {
+
+	ifstream ifile(filename, std::ifstream::binary);
+
+	if (ifile.good()) {
+
+		vector<char> buffer (windowSize + 1, 0);
+				//vector<int> test()
+		while(1)
+		{
+				string str;
+				ifile.read(buffer.data(), windowSize);
+				streamsize s = ((ifile) ? windowSize : ifile.gcount());
+
+				buffer[s] = 0;
+				if(!ifile) {
+					//cout << "Last portion of file read successfully. " << s << " character(s) read." << endl;
+					//pad it with zeros
+				}
+				cout << "\nLast portion of file read successfully. " << s << " character(s) read." << endl;
+				//create a chunk
+				Chunk chunk(windowSize/8, ind); // let's say chunk size is 16, thus 2 chunks
+				char array[windowSize] ;
+				for(int i=0;i<windowSize;i++) {
+					//cout<<buffer[i];
+					array[i] = buffer[i] ;
+					cout<<array[i]<<"ANkkita";
+				}
+				//chunk.ConvertToInt64(string(array)) ;
+
+				//str <<  buffer.data() << endl << endl;
+				if(!ifile) break;
+					cout<<str;
+				}
+				ifile.close();
+			}
+	/*read 8 chars at a time from string
 	Chunk chunk(size/8, index); // let's say chunk size is 16, thus 2 chunks
 	char array[size] ;
 	for (int i= start; i<str.size(); i++ ) {
 		array[start-i] = str[i] ;
 	}
 	chunk.ConvertToInt64(string(array)) ;
+	*/
 }
 
 void rotate(int64_t &hashInt) {
@@ -63,7 +99,7 @@ void hashing() {
 	// thread
 	Chunk data;
 	pipe.Remove(&data);
-  int64_t* intList = data.getIntegerList();
+	int64_t* intList = data.getIntegerList();
 	for (int i=0 ; i<data.getSize(); i++) {
 		rotate(hashInt) ;
 		hashInt  = hashInt ^ intList[i];
@@ -82,7 +118,8 @@ int main() {
 				break;
 			cout<<"ERROR! Has to be a multiple of 8. Try again!\n" ;
 		}
-		string str = get_file_contents(filename);
+		//string str = get_file_contents(filename);
+		reader(filename,window);
 
 
 }

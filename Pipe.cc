@@ -18,7 +18,7 @@ Pipe::Pipe(int size) {
   done=0;
 }
 
-Pipe::~Pipe () {
+Pipe::~Pipe() {
 
 	delete [] chunk;
 

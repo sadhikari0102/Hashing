@@ -27,6 +27,7 @@ private:
 
 public:
 	Pipe(int size);
+	Pipe();
 	~Pipe();
 
 	void Insert(Chunk *data);
