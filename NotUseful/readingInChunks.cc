@@ -17,8 +17,9 @@ void get_file_contents(const char* filename) {
 		ifstream ifile(filename, std::ifstream::binary);
 
 		if (ifile.good()) {
-			const int BUFFER_SIZE = 1024;
+			const int BUFFER_SIZE = 1000;
 			vector<char> buffer (BUFFER_SIZE + 1, 0);
+			//vector<int> test()
 			while(1)
 			{
 						string str;
@@ -26,8 +27,11 @@ void get_file_contents(const char* filename) {
 						streamsize s = ((ifile) ? BUFFER_SIZE : ifile.gcount());
 
 						buffer[s] = 0;
-						if(!ifile) cout << "Last portion of file read successfully. " << s << " character(s) read." << endl;
-						str <<  buffer.data() << endl << endl;
+						//if(!ifile) cout << "Last portion of file read successfully. " << s << " character(s) read." << endl;
+						cout << "\nLast portion of file read successfully. " << s << " character(s) read." << endl;
+						for(int i=0;i<BUFFER_SIZE;i++)
+					  	cout<<buffer[i];
+						//str <<  buffer.data() << endl << endl;
 						if(!ifile) break;
 						cout<<str;
 					}
