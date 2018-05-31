@@ -35,7 +35,7 @@ public:
 		int getSize() {	return sizeOfOneChunk; }
 		int getIndex() {	return chunkIndex; }
 		void Consume(Chunk *chunk);
-	//	int64_t getInteger() {	return integer; }
+	  int64_t* getIntegerList() {	return integerList; }
 };
 
 #endif /* CHUNK_H_ */

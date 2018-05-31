@@ -6,7 +6,7 @@
  */
 #include <pthread.h>
 #include <iostream>
-#include<cstdint>
+#include <cstdint>
 #include <vector>
 #include <fstream>
 #include <string>
@@ -14,7 +14,16 @@
 #include "Chunk.h"
 #include "Pipe.h"
 
+int PIPESIZE = 50;
+
 using namespace std ;
+
+
+const int index = 0;
+const int start = 0;
+
+int64_t hashInt = 0;
+Pipe pipe(PIPESIZE);
 
 string get_file_contents(const char *filename)
 {
@@ -32,39 +41,32 @@ string get_file_contents(const char *filename)
   throw(errno);
 }
 
-const int index = 0;
-const int start = 0;
-
 void reader(string str, int size) {
 	//read 8 chars at a time from string
 	Chunk chunk(size/8, index); // let's say chunk size is 16, thus 2 chunks
-	char array[] ;
+	char array[size] ;
 	for (int i= start; i<str.size(); i++ ) {
 		array[start-i] = str[i] ;
 	}
 	chunk.ConvertToInt64(string(array)) ;
 }
 
-int64_t hash = 0;
-Pipe pipe ;
-
-int64_t rotate(int64_t hash) {
+void rotate(int64_t &hashInt) {
 		int64_t mask = 15;
 		 mask = mask<<60;
-		 int64_t x = hash<<4;
-		 int64_t z = (hash & mask)>>60;
-		 int64_t fin = x|z;
-		 return fin;
+		 int64_t x = hashInt<<4;
+		 int64_t z = (hashInt & mask)>>60;
+		 hashInt = x|z;
 }
 
 void hashing() {
 	// thread
 	Chunk data;
 	pipe.Remove(&data);
-
+  int64_t* intList = data.getIntegerList();
 	for (int i=0 ; i<data.getSize(); i++) {
-		hash = rotate(hash) ;
-		hash  = hash ^ data.integerList[i];
+		rotate(hashInt) ;
+		hashInt  = hashInt ^ intList[i];
 	}
 
 }
@@ -84,5 +86,3 @@ int main() {
 
 
 }
-
-
