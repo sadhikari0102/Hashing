@@ -48,13 +48,22 @@ void reader(string str, int size) {
 int64_t hash = 0;
 Pipe pipe ;
 
+int64_t rotate(int64_t hash) {
+		int64_t mask = 15;
+		 mask = mask<<60;
+		 int64_t x = hash<<4;
+		 int64_t z = (hash & mask)>>60;
+		 int64_t fin = x|z;
+		 return fin;
+}
+
 void hashing() {
 	// thread
 	Chunk data;
 	pipe.Remove(&data);
 
 	for (int i=0 ; i<data.getSize(); i++) {
-		rotate(hash) ;
+		hash = rotate(hash) ;
 		hash  = hash ^ data.integerList[i];
 	}
 
