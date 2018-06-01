@@ -24,9 +24,6 @@ pthread_mutex_t mtx;
 pthread_mutex_t mtx1;
 pthread_mutex_t mtx2;
 
-//const int ind = 0;
-//const int start = 0;
-
 int64_t hashInt = 0;
 
 class ThreadData {
@@ -62,8 +59,8 @@ void* ProducerFunction(void* tdata) {
 	if (ifile.good()) {
 
 
-    int64_t index=1;
-				//vector<int> test()
+    int64_t index=0;
+		//vector<int> test()
 		while(1)
     {	vector<char> buffer (window + 1, 0);
 			ifile.read(buffer.data(), window);
@@ -71,10 +68,7 @@ void* ProducerFunction(void* tdata) {
       if(s==0)
         break;
 			buffer[s] = 0;
-			//cout << "\nLast portion of file read successfully. " << s << " character(s) read." << endl;
 
-      //create a chunk
-      //cout<<(int)s;
       Chunk chunk(window/8, index, (int)s); // let's say chunk size is 16, thus 2 ints
 
 			for(int i=0;i<window;i++) {
@@ -98,14 +92,6 @@ void* ProducerFunction(void* tdata) {
 
   //cout<<"\nout of readin and inserting in the pipe";
   input_pipe->Shut();
-	/*read 8 chars at a time from string
-	Chunk chunk(size/8, index); // let's say chunk size is 16, thus 2 chunks
-	char array[size] ;
-	for (int i= start; i<str.size(); i++ ) {
-		array[start-i] = str[i] ;
-	}
-	chunk.ConvertToInt64(string(array)) ;
-	*/
 }
 
 void* ConsumerFunction(void* cdata) {
@@ -119,43 +105,49 @@ void* ConsumerFunction(void* cdata) {
 
   pthread_mutex_lock(&mtx1);
   int flag = input_pipe->Remove(&data);
-  cout<<"\n new chunk removed from pipe with index "<<data.getIndex();
+  if(flag);
+    //cout<<"\n new chunk removed from pipe with index "<<data.getIndex();
   pthread_mutex_unlock(&mtx1);
 
   while(flag) {
-    cout<<"\n new chunk removed from pipe with index "<<data.getIndex();
-    //cout<<"\nchunk index = "<<data.getIndex();
-    //cout<<"\nno of ints = "<<data.getSize();
-    //cout<<"\n actual size "<<data.getActualSize();
     data.ConvertToInt64();
     //cout<<"\n INTEGER = "<<data.getIntegerList()[0];
   	int64_t* intList = data.getIntegerList();
     pthread_mutex_lock(&mtx);
+    //cout<<"\nhash before : "<<hex<<hashInt;
   	for (int i=0 ; i<data.getSize(); i++) {
 
-      //cout<<"\nhash "<<hex<<hashInt;
       int64_t x = hashInt<<4;
       int64_t z = (hashInt & mask)>>60;
       hashInt = x|z;
       hashInt  = hashInt ^ intList[i];
-
   	}
+    //cout<<"\nhash after : "<<hex<<hashInt;
     pthread_mutex_unlock(&mtx);
 
-    pthread_mutex_lock(&mtx2);
-      flag = input_pipe->Remove(&data);
-      cout<<"\n new chunk removed from pipe with index "<<data.getIndex();
-    pthread_mutex_unlock(&mtx2);
+    pthread_mutex_lock(&mtx1);
+    //data = NULL;
+    flag = input_pipe->Remove(&data);
+    if(flag); {
+      //cout<<"\n new chunk removed from pipe with index inside : "<<data.getIndex();
+    }
+    pthread_mutex_unlock(&mtx1);
 
   }
 
 }
 
-int main() {
+int main(int argc, char* argv[]) {
 		//char filename[FILEPATH_SIZE];
     string filename;
 		int window = WINDOW_DEFAULT;
     int threadCount = THREAD_COUNT;
+    /*cout<<"\n"<<argc;
+    for(int i=0;i<argc;i++) {
+      cout<<"\n"<<argv[i];
+    }*/
+
+
 		cout<<"Enter filename: " ;
 		getline(cin,filename) ;
 		while(1) {
@@ -169,11 +161,9 @@ int main() {
       cin>>threadCount;
       break;
 		}
-		//string str = get_file_contents(filename);
-		//reader(filename,window);
-
 
     /*Threading the producer*/
+
     Pipe input_pipe (PIPE_SIZE);
     ThreadData* tdata = new ThreadData;
     tdata->input_pipe = &input_pipe;
@@ -208,5 +198,6 @@ int main() {
     pthread_mutex_destroy(&mtx);
     pthread_mutex_destroy(&mtx1);
     pthread_mutex_destroy(&mtx2);
-    cout<<"\n Final Hash value is : "<<hex<<hashInt<<endl;
+    cout<<"\nFinal Hash value is : "<<hex<<hashInt<<endl;
+
 }
